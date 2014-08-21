@@ -12,6 +12,7 @@ if __name__=='__main__':
    from astropy.io import fits
 
 
+   datadir = sys.argv[3]
    outfile = sys.argv[1]
    radius = float(sys.argv[2])
 
@@ -19,7 +20,7 @@ if __name__=='__main__':
    fout= open(outfile, 'w')
 
    #grab all the files
-   infiles = glob.glob('IntensityCheck-*fit')
+   infiles = glob.glob(datadir + 'IntensityCheck-15*fit')
    infiles.sort()
 
    #remove the background
