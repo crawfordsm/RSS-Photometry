@@ -21,7 +21,7 @@ if __name__=='__main__':
    fout= open(outfile, 'w')
 
    #grab all the files
-   infiles = glob.glob(datadir + 'IntensityCheck-053*fit')
+   infiles = glob.glob(datadir + 'IntensityCheck-05*fit')
    infiles.sort()
 
    #remove the background
@@ -45,6 +45,6 @@ if __name__=='__main__':
        counts.append(c)
 
    #plot the measurements
-   #plot(counts)
-   #show()
+   plot(counts)
+   show()
 
