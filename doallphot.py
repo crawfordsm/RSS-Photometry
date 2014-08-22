@@ -44,6 +44,8 @@ if __name__=='__main__':
        fout.write('%s %s %i %i %f\n' % (img, hdu[0].header["DATE-OBS"], xc, yc, c))
        counts.append(c)
 
+   fout.flush()
+   fout.close()
    #plot the measurements
    plot(counts)
    show()
