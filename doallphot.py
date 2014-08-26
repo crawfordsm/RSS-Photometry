@@ -15,13 +15,12 @@ if __name__=='__main__':
    datadir = sys.argv[3]
    outfile = sys.argv[1]
    radius = float(sys.argv[2])
-   print datadir
 
 
    fout= open(outfile, 'w')
 
    #grab all the files
-   infiles = glob.glob(datadir + 'IntensityCheck-05*fit')
+   infiles = glob.glob(datadir + 'IntensityCheck-06*fit')
    infiles.sort()
 
    #remove the background
@@ -47,6 +46,7 @@ if __name__=='__main__':
    fout.flush()
    fout.close()
    #plot the measurements
-   plot(counts)
-   show()
+   #plot(counts)
+   #show()
+   print(np.mean(np.array(counts)))
 
