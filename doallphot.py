@@ -12,6 +12,7 @@ if __name__=='__main__':
    from astropy.io import fits
 
 
+   datadir = sys.argv[3]
    outfile = sys.argv[1]
    radius = float(sys.argv[2])
 
@@ -19,7 +20,8 @@ if __name__=='__main__':
    fout= open(outfile, 'w')
 
    #grab all the files
-   infiles = glob.glob('*fit')
+   infiles = glob.glob(datadir + 'IntensityCheck-06*fit')
+   infiles.sort()
 
    #remove the background
    counts = []
@@ -31,17 +33,20 @@ if __name__=='__main__':
        data = hdu[0].data - bkgrd
 
        #find the maximum pixel
-       i = data.argmax() 
+       i = data.argmax()
        ys, xs = data.shape
        yc = int(i/ys)
        xc = i%ys
-      
+
        #perform photometry around that
        c = aperture_phot(hdu[0].data-bkgrd, xc, yc, radius)
        fout.write('%s %s %i %i %f\n' % (img, hdu[0].header["DATE-OBS"], xc, yc, c))
        counts.append(c)
 
+   fout.flush()
+   fout.close()
    #plot the measurements
-   plot(counts)
-   show() 
-      
+   #plot(counts)
+   #show()
+   print(np.mean(np.array(counts)))
+
