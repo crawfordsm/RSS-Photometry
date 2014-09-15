@@ -1,0 +1,82 @@
+#!/usr/bin/env python
+
+"""
+Script to automatically reduce data taken in DETMODE=NORMAL mode and 
+produce a catalog of objects
+
+Author:  SM Crawford
+
+
+"""
+import os, sys
+if len(sys.argv)!=2: 
+   print "The proper form is:\nqred [image]"
+   exit()
+
+import pyfits
+
+from pyraf import iraf
+from pyraf.iraf import pysalt
+
+from saltclean import clean
+from saltmosaic import saltmosaic
+from salt2iraf import salt2iraf
+
+infile=sys.argv[1]
+
+
+
+rawpath='./'
+outpath='./'
+gaindb = '/iraf/extern/pysalt/data/rss/RSSamps.dat'
+xtalkfile = '/iraf/extern/pysalt/data/rss/RSSxtalk.dat'
+geomfile = '/iraf/extern/pysalt/data/rss/RSSgeom.dat'
+
+interp='linear'
+cleanup=True
+clobber=True
+logfile='qred.log'
+verbose=True
+status=0
+
+struct=pyfits.open(infile)
+clean(struct, createvar=False, badpixelstruct=None, mult=True, dblist=None, ampccd=2,
+         xdict=[], subover=True,trim=True, subbias=False, bstruct=None,
+         median=False, function='polynomial',order=3,rej_lo=3,rej_hi=3,niter=10,
+         plotover=False, log=None, verbose=True)
+mosaicfile='bxp'+os.path.basename(infile)
+if os.path.isfile(mosaicfile): os.remove(mosaicfile)
+struct.writeto(mosaicfile)
+
+saltmosaic(images=mosaicfile,
+                   outimages='',outpref=outpath+'m',geomfile=geomfile,
+                   interp=interp,cleanup=cleanup,clobber=clobber,logfile=logfile,
+                   verbose=verbose)
+
+outfile=outpath+'mbxp'+infile
+#cleand up the files
+os.remove(mosaicfile)
+
+salt2iraf(outpath+'m'+mosaicfile, '', outpath+'i')
+
+exit()
+
+#check to see if it is a normal image
+hdu=pyfits.open(outfile)
+obsmode=hdu[0].header['OBSMODE']
+detmode=hdu[0].header['DETMODE']
+ccdbin=int(hdu[1].header['CCDSUM'].split()[0])
+pix_scale=0.14
+r_ap=1.5/(pix_scale*ccdbin)
+print obsmode, detmode, ccdbin, r_ap
+
+#If normal imaging, then try to run sextractor on it
+if obsmode=='IMAGING' and detmode=='Normal':
+   print outfile
+   outtxt=outfile.split('.fits')[0]+'.txt'
+   print outtxt
+   cmd='sex %s -c qred.sex -CATALOG_NAME %s -PHOT_APERTURES %f ' % (outfile, outtxt, r_ap)
+   print cmd
+   os.system(cmd)
+
+   
